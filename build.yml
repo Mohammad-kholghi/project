@@ -1,12 +1,17 @@
 ---
+env: 
+  NODE_ENV=production
+  PORT=2368
+
 setup:
   - apt: python
   - command: curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash - && sudo apt-get install -y nodejs
   - command: wget foo.com/bar.tar.gz && tar -xvf bar.tar.gz
+  - command: npm ...
+    env: 
+      NODE_ENV=production
+      PORT=2368
   - git: https://github.com/.../ghost.git
-  - env: 
-      - NODE_ENV=production
-      - PORT=2368
 
 jobs:
   build:
