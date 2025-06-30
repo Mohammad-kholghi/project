@@ -35,9 +35,16 @@ exports.handler = async argv => {
         console.log(setup);
         if (setup.command) {
             // TODO: run the command on the instance
+            await sshExec('ubuntu', '37.32.9.61', path.join(homedir, '/.ssh/id_rsa'), `${setup.command}`).then(() => {
+                console.log('done');
+            });
         }
         else if (setup.apt) {
             // TODO: run the apt command on the instance to install the packages
+            // run a command over ssh:
+            await sshExec('ubuntu', '37.32.9.61', path.join(homedir, '/.ssh/id_rsa'), `sudo apt install ${setup.apt} -y`).then(() => {
+                console.log('done');
+            });
         }
         else if (setup.git) {
             // TODO: clone the git repo on the instance
