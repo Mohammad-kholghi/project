@@ -41,13 +41,15 @@ exports.handler = async argv => {
         }
         else if (setup.apt) {
             // TODO: run the apt command on the instance to install the packages
-            // run a command over ssh:
-            await sshExec('ubuntu', '37.32.9.61', path.join(homedir, '/.ssh/id_rsa'), `sudo apt install ${setup.apt} -y`).then(() => {
+            await sshExec('ubuntu', '37.32.9.61', path.join(homedir, '/.ssh/id_rsa'), `sudo apt ${setup.apt}`).then(() => {
                 console.log('done');
             });
         }
         else if (setup.git) {
             // TODO: clone the git repo on the instance
+            await sshExec('ubuntu', '37.32.9.61', path.join(homedir, '/.ssh/id_rsa'), `git ${setup.git}`).then(() => {
+                console.log('done');
+            });
         }
         else if (setup.playbook) {
             // TODO: run the ansible playbook on the instance
