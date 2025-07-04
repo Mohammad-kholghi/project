@@ -49,7 +49,7 @@ setup:
   - git: clone https://github.com/TryGhost/Ghost.git
 
   # TODO: does this wait in Ghost dir?
-  - command: cd Ghost && yarn setup && yarn dev && yarn main
+  - command: cd Ghost && export SSH_AUTH_SOCK && yarn setup && yarn dev && yarn main
 
 
 
