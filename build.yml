@@ -49,7 +49,7 @@ setup:
   - git: clone https://github.com/TryGhost/Ghost.git
 
   # TODO: does this wait in Ghost dir?
-  - command: cd Ghost && export SSH_AUTH_SOCK && git init && yarn install && yarn setup && yarn dev
+  - command: cd Ghost && export SSH_AUTH_SOCK && git init && yarn install && yarn setup
 # TODO: git init works on windows. Check that.
 # change     "setup": "yarn && git submodule update --init && NODE_ENV=development node .github/scripts/setup.js",
 
