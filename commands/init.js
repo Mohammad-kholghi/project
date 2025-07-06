@@ -41,13 +41,13 @@ exports.handler = async argv => {
         }
         else if (setup.apt) {
             // TODO: run the apt command on the instance to install the packages
-            await sshExec('ubuntu', '37.32.9.61', path.join(homedir, '/.ssh/id_rsa'), `sudo apt ${setup.apt}`).then(() => {
+            await sshExec('ubuntu', '37.32.9.61', path.join(homedir, '/.ssh/id_rsa'), `sudo apt install -y ${setup.apt}`).then(() => {
                 console.log('done');
             });
         }
         else if (setup.git) {
             // TODO: clone the git repo on the instance
-            await sshExec('ubuntu', '37.32.9.61', path.join(homedir, '/.ssh/id_rsa'), `git ${setup.git}`).then(() => {
+            await sshExec('ubuntu', '37.32.9.61', path.join(homedir, '/.ssh/id_rsa'), `git clone ${setup.git}`).then(() => {
                 console.log('done');
             });
         }
