@@ -1,21 +1,29 @@
 ---
-env: 
+env:
   NODE_ENV=production
   PORT=2368
+
+
+  
+
 
 setup:
 # ----------------------------------------------------------------------------------------------------------
   # global
-  - apt: update
+  - command: sudo apt update
   # - apt: upgrade -y
-
+  - hosts:
+    become: yes
+    tasks:
+      - name: apt
+        apt: install hi
 # ----------------------------------------------------------------------------------------------------------
   # docker
-  - apt: install -y apt-transport-https ca-certificates curl software-properties-common #for docker
+  - apt: apt-transport-https ca-certificates curl software-properties-common #for docker
   - command: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
   - command: sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu noble stable"
-  - apt: update
-  - apt: install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  - command: sudo apt update
+  - apt: docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
   - command: sudo usermod -aG docker ${USER}
 
 
@@ -28,15 +36,15 @@ setup:
 #    sudo apt  install docker.io      # version 26.1.3-0ubuntu1~24.04.1
 #    sudo service docker start
   # docker
-  # - command: wget "https://desktop.docker.com/linux/main/amd64/docker-desktop-amd64.deb"
-  # - command: dpkg -i docker-desktop-amd64.deb
-  # - command: sudo apt install -f
+  - command: wget "https://desktop.docker.com/linux/main/amd64/docker-desktop-amd64.deb"
+  - command: dpkg -i docker-desktop-amd64.deb
+  - apt: -f
 
 # ----------------------------------------------------------------------------------------------------------
   # node
-  - apt: install -y gnupg
+  - apt: gnupg
   - command: curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-  - apt: install -y nodejs
+  - apt: nodejs
 
 # ----------------------------------------------------------------------------------------------------------
   # yarn
@@ -46,7 +54,7 @@ setup:
 # ----------------------------------------------------------------------------------------------------------
   # ghost
   # - git: --recurse-submodules git@github.com:TryGhost/Ghost
-  - git: clone https://github.com/TryGhost/Ghost.git
+  - git: https://github.com/TryGhost/Ghost.git
 
   # TODO: does this wait in Ghost dir?
   - command: cd Ghost && export SSH_AUTH_SOCK && git init && yarn install && yarn setup
@@ -55,16 +63,32 @@ setup:
 
 
 
+
+
+
+#######################################################
+# mysqladmin -P 3306 -h 127.0.0.1 -u root -proot password ''
+# sudo sysctl -w fs.inotify.max_user_watches=524288
+# npx playwright install #before yarn test:acceptance in apps/admin-x-settings/
+# ghsot_testing
+#######################################################
+
+
+
     # env: 
     #   NODE_ENV=production
     #   PORT=2368
-#  - git: https://github.com/.../ghost.git
-  - apt: autoremove
-  - apt: clean
-  - apt: autoclean
+#- git: https://github.com/.../ghost.git
+  - command: sudo apt autoremove
+  - command: sudo apt clean
+  - command: sudo apt autoclean
 
 
 jobs:
   build:
     - name: install
       command: npm install
+    - name: build
+      command: npm run build
+    - name: test
+      command: npm test
