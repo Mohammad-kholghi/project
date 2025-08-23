@@ -66,7 +66,8 @@ exports.handler = async argv => {
 
 	for (const setup of buildYamlContentParsed.setup) {
 		
-		console.log(`setup is ${setup}`);
+		console.log("current setup: ");
+		console.log(setup)
 		
 		if (setup.command) {
 			// TODO: run the command on the instance
