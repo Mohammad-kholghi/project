@@ -3,42 +3,25 @@ env:
   NODE_ENV=production
   PORT=2368
 
-
-  
-
-
 setup:
 # ----------------------------------------------------------------------------------------------------------
   # global
-  - command: sudo apt update
-  # - apt: upgrade -y
-  - hosts:
-    become: yes
-    tasks:
-      - name: apt
-        apt: install hi
+  - command: apt update
 # ----------------------------------------------------------------------------------------------------------
   # docker
   - apt: apt-transport-https ca-certificates curl software-properties-common #for docker
-  - command: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-  - command: sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu noble stable"
-  - command: sudo apt update
+  - command: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+  - command: echo \
+      "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+      "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+      sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+  - command: apt update
   - apt: docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-  - command: sudo usermod -aG docker ${USER}
-
-
-#    sudo apt install apt-transport-https ca-certificates curl software-properties-common
-#    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-#    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu noble stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-#    sudo apt update
-#    sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-#    sudo snap install docker         # version 28.1.1+1, or
-#    sudo apt  install docker.io      # version 26.1.3-0ubuntu1~24.04.1
-#    sudo service docker start
-  # docker
-  - command: wget "https://desktop.docker.com/linux/main/amd64/docker-desktop-amd64.deb"
-  - command: dpkg -i docker-desktop-amd64.deb
-  - apt: -f
+  - command: usermod -aG docker ${USER}
+  - command: systemctl start docker
+  - command: systemctl enable docker
+  - command: service docker start
 
 # ----------------------------------------------------------------------------------------------------------
   # node
@@ -48,23 +31,16 @@ setup:
 
 # ----------------------------------------------------------------------------------------------------------
   # yarn
-  - command: sudo npm cache clean --force #to make sure everything works fine
-  - command: sudo npm install --global yarn
+  - command: npm cache clean --force #to make sure everything works fine
+  - command: npm install --global yarn
 
 # ----------------------------------------------------------------------------------------------------------
   # ghost
   # - git: --recurse-submodules git@github.com:TryGhost/Ghost
   - git: https://github.com/TryGhost/Ghost.git
 
-  # TODO: does this wait in Ghost dir?
-  - command: cd Ghost && export SSH_AUTH_SOCK && git init && yarn install && yarn setup
-# TODO: git init works on windows. Check that.
+  # - command: cd Ghost && export SSH_AUTH_SOCK && git init && yarn install && yarn setup
 # change     "setup": "yarn && git submodule update --init && NODE_ENV=development node .github/scripts/setup.js",
-
-
-
-
-
 
 #######################################################
 # mysqladmin -P 3306 -h 127.0.0.1 -u root -proot password ''
@@ -73,22 +49,29 @@ setup:
 # ghsot_testing
 #######################################################
 
-
-
-    # env: 
-    #   NODE_ENV=production
-    #   PORT=2368
-#- git: https://github.com/.../ghost.git
-  - command: sudo apt autoremove
-  - command: sudo apt clean
-  - command: sudo apt autoclean
+  # clean workspace
+  - command: apt autoremove
+  - command: apt clean
+  - command: apt autoclean
 
 
 jobs:
   build:
-    - name: install
-      command: npm install
-    - name: build
-      command: npm run build
-    - name: test
-      command: npm test
+    - name: Install global packages
+      command: yarn global add nx husky ember-cli patch-package playwright
+    - name: Install local packages
+      command: cd Ghost && yarn add knex-migrator -W && yarn install
+    - name: Install playwright chromium #for "yarn test:acceptance"
+    # - name: Increase machine watchers
+      # command: echo fs.inotify.max_user_watches= 131070 | tee -a /etc/sysctl.conf && sudo sysctl -p
+    - name: Build Ghost
+      command: cd Ghost && echo y | yarn setup
+    - name: server test:unit
+      env: NODE_ENV=testing
+      command: cd Ghost && yarn test:unit
+    - name: server test:acceptance
+      command: cd Ghost/apps/admin-x-activitypub/ && yarn playwright install chromium && yarn test:acceptance
+    - name: server lint
+      command: cd Ghost && yarn lint
+    - name: client test
+      command: cd Ghost/ghost/admin/ && ember test && ember test --server
