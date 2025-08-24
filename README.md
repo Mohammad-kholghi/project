@@ -1,23 +1,12 @@
-Submission
-Commit all your work related to this project to your team’s repository. You can use separate branches if you find it helpful to organize your work, however for grading purposes we will only grade the main branch (make sure to merge your work to main before the deadline). When you have finished the submission, make a branch called M1 to hold a snapshot of your work for this milestone.
+# Milestone Report:
 
-Ensure to include:
 
-Top level nodejs project implementing the CLI tool
-a sample .env file that describes the environment variables that your CLI tool expects
-a README.md file with your report details and screencast link
-a CHECKPOINT-M1.md file with your checkpoint report details
-Due date: 6/21/2025 11:59 PM
-
-NOTE: we require that you have specified a ARVAN_TOKEN environment variable in a .env file in order to run the script.
+### Video Cast:
+[Video](https://drive.google.com/file/d/1-ZuwaNE9w54MdctRDglTBQ4vc-2eClUz/view?usp=sharing)
 
 
 
-
-### Milestone Report:
-
-
-###  Contribution:
+#  Contribution:
 *Mohammad*: Everything
 
 
