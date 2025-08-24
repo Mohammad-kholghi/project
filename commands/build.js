@@ -1,6 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 const yaml = require('yaml');
+const homedir = require('os').homedir();
+const { sshExec } = require('../lib/exec');
 const { runPlaybook } = require('../lib/exec');
 
 exports.command = ['build'];
@@ -29,51 +31,37 @@ exports.handler = async argv => {
 	// TODO: create a new instance
 	// hint: you should store an inventory file when you create the instance. 
 	//       that way your ansible roles can use the inventory file to run against the instance you just created
-
+	
 	const buildYamlContent = await fs.promises.readFile(build, 'utf8');
 	const buildYamlContentParsed = yaml.parse(buildYamlContent);
-	// console.log(buildYamlContentParsed);
-	console.log(buildYamlContentParsed.jobs.build);
 	
+	// SERVER INFO
+	let sshServer =  process.env.LOCAL_SERVER;
+	let sshUser = process.env.LOCAL_USER;
+	let sshKey = path.join(homedir, process.env.SSH_KEY);
 	
-	if(job == "build"){
-		
-	}
+	const jobToRun = 'build';
 	
-	
-	if (job == buildYamlContentParsed.jobs.build) {
-		console.log(job);
-	} else {
-		console.log(job);
-		console.log(buildYamlContentParsed.jobs);
-		console.log("not")
-	}
-	
-	for (const job of buildYamlContentParsed.jobs) {
-		console.log(job);
-		if (job.build) {
-			// TODO: run the command on the instance
-			await sshExec('ubuntu', '37.32.9.61', path.join(homedir, '/.ssh/id_rsa'), `${job.command}`).then(() => {
-				console.log('done');
+	for (const step of buildYamlContentParsed.jobs[jobToRun]) {
+		if (step.command) {
+			console.log(step.command)
+			
+			let command = '';
+			
+			
+			if(step.env){
+				command = `export ${step.env} && `
+			}
+			
+			command += step.command;
+			console.log(command)
+			
+			await sshExec(sshUser, sshServer, sshKey, `${command}`).then(() => {
+				console.log(`${command} done`);
+				console.log("---------------------------------------------------------------\n\n")
 			});
 		}
-		else if (job.apt) {
-			// TODO: run the apt command on the instance to install the packages
-			await sshExec('ubuntu', '37.32.9.61', path.join(homedir, '/.ssh/id_rsa'), `sudo apt install -y ${job.apt}`).then(() => {
-				console.log('done');
-			});
-		}
-		else if (job.git) {
-			// TODO: clone the git repo on the instance
-			await sshExec('ubuntu', '37.32.9.61', path.join(homedir, '/.ssh/id_rsa'), `git clone ${job.git}`).then(() => {
-				console.log('done');
-			});
-		}
-		else if (job.playbook) {
-			// TODO: run the ansible playbook on the instance
-		}
-		else {
-			console.error('unknown setup command');
-		}
 	}
+	
+	return;
 };
